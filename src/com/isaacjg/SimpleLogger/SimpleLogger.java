@@ -7,6 +7,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.io.File;
 import java.io.FileWriter;
+import java.util.ArrayList;
 import java.util.Calendar;
 
 import javax.swing.BorderFactory;
@@ -51,7 +52,7 @@ public class SimpleLogger {
 	private JPanel entryPanel;
 	private JScrollPane scrollPane;
 
-	private String[] logEntries;
+	private ArrayList<String> logEntries;
 	private JList<String> logList;
 	private JTextField logEntry;
 	private JButton logButton;
@@ -68,22 +69,10 @@ public class SimpleLogger {
 		new SimpleLogger();
 	}
 
-	private void addToLogEntries(String entry) {
-		String[] temp = new String[logEntries.length+1];
-		for (int i = 0; i < temp.length; ++i) {
-			if (i < logEntries.length) {
-				temp[i] = logEntries[i];
-			} else {
-				temp[i] = entry;
-			}
-		}
-		logEntries = temp;
-	}
-
 	private JPanel makeCoreComponents() {
 		JPanel main = new JPanel(new BorderLayout());
 
-		logEntries = new String[] {};
+		logEntries = new ArrayList<String>();
 		logList = new JList<String>();
 		logEntry = new JTextField(75);
 		logButton = new JButton("Log");
@@ -201,7 +190,7 @@ public class SimpleLogger {
 		public void valueChanged(ListSelectionEvent e) {
 			if (!e.getValueIsAdjusting()) {
 				if (logList.getSelectedIndex() > -1) {
-					logEntry.setText(stripHTML(logEntries[logList.getSelectedIndex()]));
+					logEntry.setText(stripHTML(logEntries.get(logList.getSelectedIndex())));
 				}
 			}
 		}
@@ -209,8 +198,8 @@ public class SimpleLogger {
 	class LogButtonActionListener implements ActionListener {
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			addToLogEntries(generateLogStr());
-			logList.setListData(logEntries);
+			logEntries.add(generateLogStr());
+			logList.setListData(logEntries.toArray(new String[] {}));
 			logEntry.setText("");
 		}
 	}
@@ -238,8 +227,8 @@ public class SimpleLogger {
 				if (s.isPressed()) {
 					try {
 						FileWriter fw = new FileWriter(new File(new File("."), "log.html"));
-						for (int i = 0; i < logEntries.length; ++i) {
-							fw.write(logEntries[i] + "<br />\r\n");
+						for (String entry : logEntries) {
+							fw.write(entry + "<br />\r\n");
 						}
 						fw.close();
 					} catch (Exception e1) {
@@ -247,8 +236,8 @@ public class SimpleLogger {
 					}
 				}
 			} else if (enter.isPressed()) {
-				addToLogEntries(generateLogStr());
-				logList.setListData(logEntries);
+				logEntries.add(generateLogStr());
+				logList.setListData(logEntries.toArray(new String[] {}));
 				logEntry.setText("");
 			}
 		}
